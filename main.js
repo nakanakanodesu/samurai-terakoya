@@ -1,44 +1,20 @@
-`use strict`;
-
-const buttonAdd = document.getElementById(`button-add`);
-const buttonSub = document.getElementById(`button-sub`);
-const buttonMul = document.getElementById(`button-mul`);
-const buttonDiv = document.getElementById(`button-div`);
-const num1 = document.getElementById(`num1`);
-const num2 = document.getElementById(`num2`);
-const box = document.getElementById(`box`);
-
-const getNum1 = () => {
-  // num1の数値を戻り値としてreturnする処理を書いてください
-  return Number.parseFloat(num1.value);
+//関数を定義
+const fizzbuzz = (a) => {
+  
+  //条件分岐
+  if (a % 3 === 0 && a % 5 === 0) {
+    return "FizzBuzz";
+  } else if (a % 3 === 0) {
+    return "Fizz";
+  } else if (a % 5 === 0) {
+    return "Buzz";
+  } else {
+    return a;
+  }
 };
 
-const getNum2 = () => {
-  // num2の数値を戻り値としてreturnする処理を書いてください
-  return Number.parseFloat(num2.value);
-};
-
-const showResult = (num) => {
-  // <div id="box">にnumを表示する処理を書いてください
-  box.textContent = num;
-};
-
-buttonAdd.addEventListener("click", () => {
-  const result = getNum1() + getNum2();
-  showResult(result);
-});
-
-buttonSub.addEventListener("click", () => {
-  const result = num1.value - num2.value;
-  showResult(result);
-});
-
-buttonMul.addEventListener("click", () => {
-  const result = getNum1() * getNum2();
-  showResult(result);
-});
-
-buttonDiv.addEventListener("click", () => {
-  const result = getNum1() / getNum2();
-  showResult(result);
-});
+//1〜maxまでのループ
+const max = 100;
+for (let b = 1; b <= max; b++) {
+  console.log(fizzbuzz(b));
+}
