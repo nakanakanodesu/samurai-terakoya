@@ -1,21 +1,42 @@
-const animal = { //animalという変数名でオブジェクト作成
-  name: `雀`, //動物の種類名（'犬'・'猫'など）の文字列を代入するプロパティ
-  voice: `チュンチュン`, //鳴き声の文字列を代入するプロパティ
-  bark: function () { //オブジェクト自身の name と voice へアクセスした上で、鳴き方の説明をコンソールに出力するメソッド
-    console.log(`${this.name}は${this.voice}と鳴く`);
-  },
+const buttonAdd = document.getElementById(`button-add`);
+const buttonSub = document.getElementById(`button-sub`);
+const buttonMul = document.getElementById(`button-mul`);
+const buttonDiv = document.getElementById(`button-div`);
+const num1 = document.getElementById(`num1`);
+const num2 = document.getElementById(`num2`);
+const box = document.getElementById(`box`);
+
+const getNum1 = () => {
+  // num1の数値を戻り値としてreturnする処理を書いてください
+  return Number.parseFloat(num1.value);
 };
-animal.bark(); //メソッドを呼び出し
- 
- 
-// const animal = {
-//   //animalという変数名でオブジェクト作成
-//   name: [`雀`, `狼`], //動物の種類名（'犬'・'猫'など）の文字列を代入するプロパティ
-//   voice: [`チュンチュン`, `ウォウウォウ`], //鳴き声の文字列を代入するプロパティ
-//   bark: function () {
-//     //オブジェクト自身の name と voice へアクセスした上で、鳴き方の説明をコンソールに出力するメソッド
-//     console.log(`${this.name[0]}は${this.voice[0]}と鳴く`);
-//     console.log(`${this.name[1]}は${this.voice[1]}と鳴く`);
-//   },
-// };
-// animal.bark(); //メソッドを呼び出し
+
+const getNum2 = () => {
+  // num2の数値を戻り値としてreturnする処理を書いてください
+  return Number.parseFloat(num2.value);
+};
+
+const showResult = (num) => {
+  // <div id="box">にnumを表示する処理を書いてください
+  box.textContent = num;
+};
+
+buttonAdd.addEventListener("click", () => {
+  const result = getNum1() + getNum2();
+  showResult(result);
+});
+
+buttonSub.addEventListener("click", () => {
+  const result = getNum1() - getNum2();
+  showResult(result);
+});
+
+buttonMul.addEventListener("click", () => {
+  const result = getNum1() * getNum2();
+  showResult(result);
+});
+
+buttonDiv.addEventListener("click", () => {
+  const result = getNum1() / getNum2();
+  showResult(result);
+});
