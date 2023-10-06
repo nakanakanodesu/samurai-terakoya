@@ -1,17 +1,44 @@
-process.stdin.resume();
-process.stdin.setEncoding("utf8");
-// 自分の得意な言語で
-// Let's チャレンジ！！
-var lines = [];
-var reader = require("readline").createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-reader.on("line", (line) => {
-  lines.push(line);
+`use strict`;
+
+const buttonAdd = document.getElementById(`button-add`);
+const buttonSub = document.getElementById(`button-sub`);
+const buttonMul = document.getElementById(`button-mul`);
+const buttonDiv = document.getElementById(`button-div`);
+const num1 = document.getElementById(`num1`);
+const num2 = document.getElementById(`num2`);
+const box = document.getElementById(`box`);
+
+const getNum1 = () => {
+  // num1の数値を戻り値としてreturnする処理を書いてください
+  return Number.parseFloat(num1.value);
+};
+
+const getNum2 = () => {
+  // num2の数値を戻り値としてreturnする処理を書いてください
+  return Number.parseFloat(num2.value);
+};
+
+const showResult = (num) => {
+  // <div id="box">にnumを表示する処理を書いてください
+  box.textContent = num;
+};
+
+buttonAdd.addEventListener("click", () => {
+  const result = getNum1() + getNum2();
+  showResult(result);
 });
 
-reader.on("close", () => {
-  for (let i = 0; i < lines; i++);
-  console.log(lines[0]);
+buttonSub.addEventListener("click", () => {
+  const result = num1.value - num2.value;
+  showResult(result);
+});
+
+buttonMul.addEventListener("click", () => {
+  const result = getNum1() * getNum2();
+  showResult(result);
+});
+
+buttonDiv.addEventListener("click", () => {
+  const result = getNum1() / getNum2();
+  showResult(result);
 });
