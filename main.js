@@ -1,44 +1,26 @@
-`use strict`;
-
-const buttonAdd = document.getElementById(`button-add`);
-const buttonSub = document.getElementById(`button-sub`);
-const buttonMul = document.getElementById(`button-mul`);
-const buttonDiv = document.getElementById(`button-div`);
-const num1 = document.getElementById(`num1`);
-const num2 = document.getElementById(`num2`);
-const box = document.getElementById(`box`);
-
-const getNum1 = () => {
-  // num1の数値を戻り値としてreturnする処理を書いてください
-  return Number.parseFloat(num1.value);
+// ボタンの表示／非表示を切り替える関数
+const updateButton = () => {
+  if ($(window).scrollTop() >= 300) {
+    // 300px以上スクロールされた
+    // ボタンを表示
+    $(".back-to-top").fadeIn();
+  } else {
+    // ボタンを非表示
+    $(".back-to-top").fadeOut();
+  }
 };
 
-const getNum2 = () => {
-  // num2の数値を戻り値としてreturnする処理を書いてください
-  return Number.parseFloat(num2.value);
-};
+// スクロールされる度にupdateButtonを実行
+$(window).on("scroll", updateButton);
 
-const showResult = (num) => {
-  // <div id="box">にnumを表示する処理を書いてください
-  box.textContent = num;
-};
+// ボタンをクリックしたらページトップにスクロールする
+$(".back-to-top").on("click", (e) => {
+  // ボタンのhrefに遷移しない
+  e.preventDefault();
 
-buttonAdd.addEventListener("click", () => {
-  const result = getNum1() + getNum2();
-  showResult(result);
+  // 600ミリ秒かけてトップに戻る
+  $("html, body").animate({ scrollTop: 0 }, 600);
 });
 
-buttonSub.addEventListener("click", () => {
-  const result = num1.value - num2.value;
-  showResult(result);
-});
-
-buttonMul.addEventListener("click", () => {
-  const result = getNum1() * getNum2();
-  showResult(result);
-});
-
-buttonDiv.addEventListener("click", () => {
-  const result = getNum1() / getNum2();
-  showResult(result);
-});
+// ページの途中でリロード（再読み込み）された場合でも、ボタンが表示されるようにする
+updateButton();
