@@ -1,63 +1,30 @@
-body {
-  font-family: "Hiragino Maru Gothic ProN", sans-serif;
+/* 長いコンテンツを作成 */
+#contents {
+  height: 2000px;
+  background: linear-gradient(gray, white);
 }
 
-ul {
-  list-style: none;
-}
+/* トップに戻るボタン */
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
 
-.slide-wrapper {
-  text-align: center;
-  width: 1000px;
-  margin: 0 auto;
-  color: #5e6f84;
-  padding: 60px 0;
-}
-
-.slide-title {
-  font-size: 40px;
-  margin-bottom: 30px;
-}
-
-.slides {
-  padding: 0;
-}
-
-.slide {
-  display: none;/* displayプロパティをnoneにしてください */
-  
-  
-}
-
-.active {
-  /* displayプロパティをblockにしてください */
-  display: block;
-  
-}
-
-.slide img {
-  width: 500px;
-  height: auto;
-  border-radius: 5px;
-}
-
-.index-btn-wrapper {
-  font-size: 16px;
-  margin-top: 20px;
-}
-
-.index-btn {
-  display: inline-block;
-  color: #4e90af;
-  background-color: #e0f5ff;
+  display: none;
   width: 40px;
-  padding: 6px 0;
-  margin: 0 5px;
-  border-radius: 3px;
-  cursor: pointer;
+  height: 40px;
+
+  background-color: #f0f0f0;
+  color: #333;
+  opacity: 0.6;
+
+  font-size: 1.6rem;
+  line-height: 40px;
+  text-align: center;
+  text-decoration: none;
 }
 
-.index-btn:hover {
-  color: #fff;
-  background-color: #5cabd0;
+/* マウスを乗せた時に透明度を変える */
+.back-to-top:hover {
+  opacity: 1;
 }
