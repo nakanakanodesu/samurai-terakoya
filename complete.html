@@ -17,17 +17,19 @@
       <nav class="navbar bg-base-200">
         <div class="flex-1">
           <!-- ボタンの背景を透明にする指定を追加 -->
-          <a href="#" class="normal-case text-xl btn">サンプル株式会社</a>
+          <a href="#" class="normal-case text-xl btn btn-ghost"
+            >サンプル株式会社</a
+          >
 
           <!-- メニューについて、以下の2つの指定を追加 -->
           <!-- (1)通常は表示しない -->
           <!-- (2)768px以上の画面幅のときにメニューを表示する -->
-          <ul class="menu menu-horizontal p-0">
+          <ul class="menu menu-horizontal p-0 invisible md:visible">
             <li><a href="#">会社情報</a></li>
             <li><a href="#">ニュース</a></li>
             <li><a href="#">採用情報</a></li>
             <!-- お問い合わせページを表示していることをわかりやすくする設定を追加 -->
-            <li><a href="#" class="">お問い合わせ</a></li>
+            <li><a href="#" class="btn-primary text-white">お問い合わせ</a></li>
           </ul>
         </div>
         <div class="flex-none">
@@ -69,7 +71,7 @@
       </div>
       <div class="text-center mb-4">
         <!-- 「戻る」ボタンを紫色にする設定を追加 -->
-        <a href="contact.html" class="btn">戻る</a>
+        <a href="contact.html" class="btn btn-primary">戻る</a>
       </div>
     </div>
     <footer class="text-center pt-3 border-top">&copy; 2022 SAMPLE Inc.</footer>
