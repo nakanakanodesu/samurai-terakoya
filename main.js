@@ -1,242 +1,169 @@
-// モバイルブラウザかどうか判定
-const isMobile = !!new MobileDetect(window.navigator.userAgent).mobile();
+/* jshint curly:true, debug:true */
+
+// Flickr API key
+const API_KEY = "f0edbea71f9b14509e7218b5f4c649b4";
+
+// 状態の定数
+const IS_INITIALIZED = "IS_INITIALIZED"; // 最初の状態
+const IS_FETCHING = "IS_FETCHING"; // APIからデータを取得中
+const IS_FAILED = "IS_FAILED"; // APIからデータを取得できなかった
+const IS_FOUND = "IS_FOUND"; // APIから画像データを取得できた
 
 /**
- * ----------------------
- * 指定された名前のタブを表示
- * ----------------------
+ * TODO: 状態の定数を定義する
+ * この定数は「検索テキストに該当する画像データがない状態」を表す
+ * 定数名は、例えば IS_NOT_FOUND などが分かりやすい
  */
-const showTab = (tabName) => {
-  // すでに表示されている場合は何もせずに終了
-  if ($(`#${tabName}`).is(":visible")) {
-    return;
+const IS_NOT_FOUND = "IS_NOT_FOUND"; // APIから画像データを取得できなかった
+/**
+ * --------------------
+ * Flickr API 関連の関数
+ * --------------------
+ */
+
+// 検索テキストに応じたデータを取得するためのURLを作成して返す
+const getRequestURL = (searchText) => {
+  const parameters = {
+    method: "flickr.photos.search",
+    api_key: API_KEY,
+    text: searchText, // 検索テキスト
+    sort: "interestingness-desc", // 興味深さ順
+    per_page: 12, // 取得件数
+    license: "4", // Creative Commons Attributionのみ
+    extras: "owner_name,license", // 追加で取得する情報
+    format: "json", // レスポンスをJSON形式に
+    nojsoncallback: 1, // レスポンスの先頭に関数呼び出しを含めない
+  };
+  const url = new URL("https://api.flickr.com/services/rest");
+  url.search = new URLSearchParams(parameters);
+  return url;
+};
+
+// photoオブジェクトから画像のURLを作成して返す
+const getFlickrImageURL = (photo, size) => {
+  let url = `https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}`;
+  if (size) {
+    // サイズ指定ありの場合
+    url += `_${size}`;
   }
+  url += ".jpg";
+  return url;
+};
 
-  const tabsContainer = $(`a[href='#${tabName}']`).closest(".tabs");
-  // .tabs__menu liのうちtabNameに該当するものにだけactiveクラスを付ける
-  tabsContainer.find(".tabs__menu li").removeClass("active");
-  tabsContainer
-    .find(`.tabs__menu a[href='#${tabName}']`)
-    .parent("li")
-    .addClass("active");
+// photoオブジェクトからページのURLを作成して返す
+const getFlickrPageURL = (photo) =>
+  `https://www.flickr.com/photos/${photo.owner}/${photo.id}`;
 
-  // .tabs__contentの直下の要素をすべて非表示
-  tabsContainer.find(".tabs__content > *").css({ display: "none" });
-  // #<tabName>と.tabs__content .<tabName>を表示
-  tabsContainer
-    .find(`#${tabName}, .tabs__content .${tabName}`)
-    .css({
-      display: "block",
-      opacity: 0.7,
-    })
-    .animate(
-      {
-        opacity: 1,
-      },
-      400
-    );
+// photoオブジェクトからaltテキストを生成して返す
+const getFlickrText = (photo) => {
+  let text = `"${photo.title}" by ${photo.ownername}`;
+  if (photo.license === "4") {
+    // Creative Commons Attribution（CC BY）ライセンス
+    text += " / CC BY";
+  }
+  return text;
 };
 
 /**
  * -------------
- * パララックス関連
+ * Vueインスタンス
  * -------------
  */
 
-// 背景画像のスクロール速度。数字が小さいほど速い。
-const parallaxXSpeed = 12;
-const parallaxYSpeed = 3;
-const parallaxXSpeedSmall = 5;
-const parallaxYSpeedSmall = 1;
+new Vue({
+  el: "#app",
 
-// パララックスを適用する関数
-const showParallax = () => {
-  const scrollTop = $(window).scrollTop();
-
-  // 背景画像の位置をスクロールに合わせて変える
-  const offsetX = Math.round(scrollTop / parallaxXSpeed);
-  const offsetY = Math.round(scrollTop / parallaxYSpeed);
-  const offsetXSmall = Math.round(scrollTop / parallaxXSpeedSmall);
-  const offsetYSmall = Math.round(scrollTop / parallaxYSpeedSmall);
-
-  $(".puppies").css({
-    "background-position":
-      // 一番上
-      `${-offsetX}px ${-offsetY}px, ${
-        // 上から2番目
-        offsetXSmall
-      }px ${-offsetYSmall}px, ` +
-      // 一番下
-      "0% 0%",
-  });
-
-  $(".kittens").css({
-    "background-position":
-      // 一番上
-      `${offsetX}px ${-offsetY}px, ${
-        // 上から2番目
-        -offsetXSmall
-      }px ${-offsetYSmall}px, ` +
-      // 一番下
-      "0% 0%",
-  });
-};
-
-// パララックスを初期化する関数
-const initParallax = () => {
-  $(window).off("scroll", showParallax);
-
-  if (!isMobile) {
-    // モバイルブラウザでなければパララックスを適用
-    showParallax();
-
-    // スクロールのたびにshowParallax関数を呼ぶ
-    $(window).on("scroll", showParallax);
-  }
-};
-
-/**
- * ------------------
- * イベントハンドラの登録
- * ------------------
- */
-
-/**
- * animatedクラスを持つ要素が画面内に入ったら
- * Animate.cssのfadeOutUpエフェクトを適用
- */
-$(".animated").waypoint({
-  handler(direction) {
-    if (direction === "up") {
-      $(this.element).addClass("fadeOutUp");
-    } else {
-      $(this.element).removeClass("fadeOutUp");
-    }
-    // this.destroy();
+  data: {
+    prevSearchText: "",
+    photos: [],
+    currentState: IS_INITIALIZED,
   },
-  /**
-   * 要素の上端が画面のどの位置に来たときにhandlerメソッドを呼び出すか指定
-   * 0%なら画面の一番上、100%なら画面の一番下に来たときに呼び出される
-   */
-  offset: "50%",
-});
-/**
- * animatedクラスを持つ要素が画面内に入ったら
- * Animate.cssのfadeInUpエフェクトを適用
-//  */
-$(".animated").waypoint({
-  handler(direction) {
-    if (direction === "down") {
-      $(this.element).addClass("fadeInUp");
-      // this.destroy();
-    } else {
-      $(this.element).removeClass("fadeInUp");
-      // this.destroy();
-    }
-  },
-  /**
-   * 要素の上端が画面のどの位置に来たときにhandlerメソッドを呼び出すか指定
-   * 0%なら画面の一番上、100%なら画面の一番下に来たときに呼び出される
-   */
-  offset: "50%",
-});
 
-$(window).on("resize", () => {
-  // ウインドウがリサイズされるとここが実行される
-  initParallax();
-});
-
-// タブがクリックされたらコンテンツを表示
-$(".tabs__menu a").on("click", (e) => {
-  const tabName = $(e.currentTarget).attr("href");
-
-  // hrefにページ遷移しない
-  e.preventDefault();
-
-  if (tabName[0] === "#") {
-    // hrefの先頭の#を除いたものをshowTab()関数に渡す
-    showTab(tabName.substring(1));
-  }
-});
-
-/**
- * モバイル用メニューボタンが押されたら、メニューを表示する。
- */
-$(".nav__menu-button").on("click", (e) => {
-  // nav__menuクラスにはopacity: 0、nav__menu--showクラスには、opacity: 0.9 が設定されている
-  // javascript側では、nav__menu--showクラスをつけたり外したりするだけで表示・非表示が切り替わる。
-  $(".nav__menu").toggleClass("nav__menu--show");
-});
-
-/**
- * ナビゲーションバーのリンクをクリックしたら、
- * スムーズにスクロールしながら対象位置に移動
- */
-$(".nav__link").on("click", (e) => {
-  // 本来のクリックイベントは処理しない
-  e.preventDefault();
-
-  // デフォルトはトップ
-  let scrollTop = 0;
-
-  // #id名が指定されていたら、該当箇所の位置で上書きする。
-  // e.currentTargetは、イベントハンドラを登録した要素を表す。
-  // e.targetは実際にイベントが発生した要素。
-  // 左上のアイコンをクリックすると、イベントを発生した要素(=e.target)はアイコンとなり、
-  // 該当イベントを処理するイベントハンドラを登録した要素(=e.currentTarget)は、a要素となる。
-  // a要素のhref属性を取得したいので、e.currentTargetを用いる。
-  const destination = $(e.currentTarget).attr("href");
-
-  if (destination !== "#") {
-    scrollTop = $(destination).offset().top;
-  }
-
-  $("html, body").animate(
-    {
-      scrollTop,
+  computed: {
+    isInitialized() {
+      return this.currentState === IS_INITIALIZED;
     },
-    1000
-  );
+    isFetching() {
+      return this.currentState === IS_FETCHING;
+    },
+    isFailed() {
+      return this.currentState === IS_FAILED;
+    },
+    isFound() {
+      return this.currentState === IS_FOUND;
+    },
 
-  // メニューが開いている場合は閉じる
-  if ($(".nav__menu").hasClass("nav__menu--show")) {
-    $(".nav__menu").removeClass("nav__menu--show");
-  }
+    /**
+     * TODO: 算出プロパティを定義する
+     * この算出プロパティは、現在の状態が「検索テキストに該当する画像データがない状態」と一致するときにtrueを返す
+     */
+    isNotFound() {
+      return this.currentState === IS_NOT_FOUND;
+    },
+  },
+
+  methods: {
+    // 状態を変更する
+    toFetching() {
+      this.currentState = IS_FETCHING;
+    },
+    toFailed() {
+      this.currentState = IS_FAILED;
+    },
+    toFound() {
+      this.currentState = IS_FOUND;
+    },
+
+    /**
+     * TODO: メソッドを定義する
+     * このメソッドは、現在の状態を「検索テキストに該当する画像データがない状態」に変更する
+     */
+    toNotFound() {
+      this.currentState = IS_NOT_FOUND;
+    },
+
+    fetchImagesFromFlickr(event) {
+      const searchText = event.target.elements.search.value;
+
+      // APIからデータを取得中で、なおかつ検索テキストが前回の検索時と同じ場合、再度リクエストしない
+      if (this.isFetching && searchText === this.prevSearchText) {
+        return;
+      }
+
+      // Vueインスタンスのデータとして、検索テキストを保持しておく
+      this.prevSearchText = searchText;
+
+      this.toFetching();
+
+      const url = getRequestURL(searchText);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.stat !== "ok") {
+            this.toFailed();
+            return;
+          }
+
+          const fetchedPhotos = data.photos.photo;
+
+          // 検索テキストに該当する画像データがない場合
+          if (fetchedPhotos.length === 0) {
+            // TODO: メソッドを呼び出して、現在の状態を「検索テキストに該当する画像データがない状態」に変更する
+            this.toNotFound();
+            return;
+          }
+
+          this.photos = fetchedPhotos.map((photo) => ({
+            id: photo.id,
+            imageURL: getFlickrImageURL(photo, "q"),
+            pageURL: getFlickrPageURL(photo),
+            text: getFlickrText(photo),
+          }));
+          this.toFound();
+        })
+        .catch(() => {
+          this.toFailed();
+        });
+    },
+  },
 });
-
-// image-gallery__itemクラスの中のa要素にMagnific Popupを適用
-$(".image-gallery__item a").magnificPopup({
-  type: "image",
-  gallery: { enabled: true },
-
-  /**
-   * ポップアップに適用されるクラス。
-   * ここではフェードイン・アウト用のmfp-fadeクラスを適用。
-   */
-  mainClass: "mfp-fade",
-
-  // ポップアップが非表示になるまでの待ち時間
-  removalDelay: 300,
-});
-
-/**
- * ---------------------------------------
- * ページの読み込みが完了したタイミングで行うDOM操作
- * ---------------------------------------
- */
-
-// モバイルブラウザでは静止画を表示し、それ以外では動画を表示
-if (isMobile) {
-  $(".top__bg").css({
-    "background-image": "url(video/top-video-still.jpg)",
-  });
-} else {
-  $(".top__video").css({ display: "block" });
-}
-
-// 初期状態として1番目のタブを表示
-showTab("puppies-1");
-showTab("kittens-1");
-
-// パララックスを初期化する
-initParallax();
